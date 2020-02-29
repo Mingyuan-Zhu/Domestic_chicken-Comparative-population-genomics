@@ -1,0 +1,15 @@
+
+VCFtools - v0.1.13
+(C) Adam Auton and Anthony Marcketta 2009
+
+Parameters as interpreted:
+	--vcf Frizzle_chicken_filterno3.vcf
+	--keep yuanbao_white.list
+	--out yuanbao_white.
+	--recode
+
+Keeping individuals in 'keep' list
+After filtering, kept 8 out of 62 Individuals
+Outputting VCF file...
+After filtering, kept 18178137 out of a possible 18178137 Sites
+Run Time = 1382.00 seconds

@@ -1,4 +1,0 @@
-stopgain was seen 711 times.
-nonsynonymous was seen 85706 times.
-synonymous was seen 200747 times.
-stoploss was seen 159 times.

@@ -1,0 +1,14 @@
+
+VCFtools - v0.1.13
+(C) Adam Auton and Anthony Marcketta 2009
+
+Parameters as interpreted:
+	--vcf /home/zhumy/yuanbaochicken/yuanbao_other..recode.vcf
+	--out yuanbao_other..recode.vcf.W50S25
+	--window-pi 50000
+	--window-pi-step 25000
+
+After filtering, kept 8 out of 8 Individuals
+Outputting Windowed Nucleotide Diversity Statistics...
+After filtering, kept 18178137 out of a possible 18178137 Sites
+Run Time = 113.00 seconds

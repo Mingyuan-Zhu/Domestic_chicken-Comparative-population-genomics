@@ -1,0 +1,40 @@
+#nohup /GS01/home/wangms/software/vcftools_0.1.13/bin/vcftools --gzvcf ../Jiningbairi.chr$i.vcf.gz --window-pi 50000 --window-pi-step 25000 --out Jiningbairi.chr$i.vcf.gz.W50S25 2>copy1.pi.err &
+#nohup /GS01/home/wangms/software/vcftools_0.1.13/bin/vcftools --gzvcf ../Sailama.chr$i.recode.vcf.gz  --window-pi 50000 --window-pi-step 25000 --out Sailama.chr$i.recode.vcf.gz.W50S25 2>copy2.pi.err &
+nohup perl merge_PI.pl  $i &done
+
+
+##########
+nohup /GS01/home/wangms/software/vcftools_0.1.13/bin/vcftools --gzvcf /GS01/home/wangms/WangMS/Global-chicken/Tibetan-chicken/vcf_file/tibetan_kept.withGVF.no3_autos.recode.vcf.gz   --weir-fst-pop TibetA.list   --weir-fst-pop 185Chinese.list  --out TibetA-185Chinese.site.fst 1>TibetA-185Chinese.site.fst.err 2>TibetA-185Chinese.site.fst.out &
+ nohup /GS01/home/wangms/software/vcftools_0.1.13/bin/vcftools --gzvcf /GS01/home/wangms/WangMS/Global-chicken/Tibetan-chicken/vcf_file/tibetan_kept.withGVF.no3_autos.recode.vcf.gz   --weir-fst-pop TibetB.list   --weir-fst-pop 185Chinese.list  --out TibetB-185Chinese.site.fst 1>TibetB-185Chinese.site.fst.err 2>TibetB-185Chinese.site.fst.out &
+
+
+   
+
+
+###########pca
+/public/home/wangms/software/vcftools_0.1.13/bin/vcftools  --vcf ../../Global_chicken.GA_noout.merge.raw.filter4_final.mv3.recode_no3_autos.vcf  --maf 0.05 --plink --out 152RJF_693dom.mv3.no3.autos
+
+/public/home/wangms/software/plink_1.9/plink --noweb --dog  --file 152RJF_693dom.mv3.no3.autos --indep-pairwise 50 10 0.1
+/public/home/wangms/software/plink_1.9/plink --noweb --dog  --file 152RJF_693dom.mv3.no3.autos --extract plink.prune.in 
+
+ --make-bed --out 152RJF_693dom.mv3.no3.autos_prunedData_pairwise
+/public/home/wangms/software/gcta64 --bfile 152RJF_693dom.mv3.no3.autos_prunedData_pairwise --make-grm --autosome --out 152RJF_693dom.mv3.no3.autos_prunedData_pairwise_grm
+/public/home/wangms/software/gcta64 --grm 152RJF_693dom.mv3.no3.autos_prunedData_pairwise_grm  --pca 3 --out 152RJF_693dom.mv3.no3.autos_prunedData_pairwise.pca
+
+
+
+
+
+
+
+
+
+
+
+
+for K in 2 3 4 5 6 7 8 9
+do
+/public/home/wangms/software/admixture_linux-1.23/admixture --cv 152RJF_693dom.mv3.no3.autos_prunedData_pairwise.bed  $K -j8 | tee log_2${K}.out
+done
+
+

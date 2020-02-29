@@ -1,0 +1,16 @@
+
+VCFtools - v0.1.13
+(C) Adam Auton and Anthony Marcketta 2009
+
+Parameters as interpreted:
+	--gzvcf Sailama.chr2.recode.vcf.gz
+	--keep A.list
+	--out A.keep
+	--recode
+
+Using zlib version: 1.2.7
+Keeping individuals in 'keep' list
+After filtering, kept 3 out of 104 Individuals
+Outputting VCF file...
+After filtering, kept 5118123 out of a possible 5118123 Sites
+Run Time = 493.00 seconds

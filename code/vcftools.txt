@@ -1,0 +1,2 @@
+biosoft/vcftools/vcftools_0.1.13/bin/vcftools --gzvcf Sailama.chr2.recode.vcf.gz   --keep  A.list  --out saliama. --recode &  ##a的样本个体在a.list,取出a
+biosoft/vcftools/vcftools_0.1.13/bin/vcftools --gzvcf Sailama.chr2.recode.vcf.gz   --weir-fst-pop A.list   --weir-fst-pop B.list  --out A-B.site.fst #计算ab两个fst
