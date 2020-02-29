@@ -1,0 +1,126 @@
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@		FULL SCRIPT 
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+#!/bin/sh
+#PBS -N s4328_HJCMLCCXX_L2_map
+#PBS -q small
+#PBS -l nodes=1:ppn=4
+#PBS -o /lustre/user/newton/qcjob.out
+#PBS -e /lustre/user/newton/qcjob.err
+
+cd /lustre/user/newton/africanchicken
+
+#for i in s4328_HJCMLCCXX_L2
+#do
+gzip -d s4328_HJCMLCCXX_L2_1.clean.fq.gz
+gzip -d s4328_HJCMLCCXX_L2_2.clean.fq.gz
+
+##Quality control [Trim paired ends]
+
+/lustre/user/shenqk/shenqk_bin/software/Btrim64 -S -q -s  summary_s4328_HJCMLCCXX_L2_1.clean.fq.Btrim64 -l 25 -a 20 -o  s4328_HJCMLCCXX_L2_1.clean.fq.Btrim64 -t s4328_HJCMLCCXX_L2_1.clean.fq
+/lustre/user/shenqk/shenqk_bin/software/Btrim64 -S -q -s  summary_s4328_HJCMLCCXX_L2_2.clean.fq.Btrim64 -l 25 -a 20 -o  s4328_HJCMLCCXX_L2_2.clean.fq.Btrim64 -t s4328_HJCMLCCXX_L2_2.clean.fq
+gzip s4328_HJCMLCCXX_L2_2.clean.fq s4328_HJCMLCCXX_L2_1.clean.fq
+perl /lustre/user/shenqk/shenqk_bin/paired_end_trim.pl summary_s4328_HJCMLCCXX_L2_1.clean.fq.Btrim64  summary_s4328_HJCMLCCXX_L2_2.clean.fq.Btrim64   s4328_HJCMLCCXX_L2_1.clean.fq.Btrim64   s4328_HJCMLCCXX_L2_2.clean.fq.Btrim64
+
+rm summary_s4328_HJCMLCCXX_L2_1.clean.fq.Btrim64  summary_s4328_HJCMLCCXX_L2_2.clean.fq.Btrim64   s4328_HJCMLCCXX_L2_1.clean.fq.Btrim64   s4328_HJCMLCCXX_L2_2.clean.fq.Btrim64
+
+
++++++++++++++++++++++++++++++++++++++++++
++ 	to prepare the reference genome	+  
++++++++++++++++++++++++++++++++++++++++++
+
+#for "Gallus_gallus.Gallus_gallus-5.0.dna.toplevel.fa.gz" [index and create dictionary]
+
+cd /lustre/user/newton/Galgal5
+gzip -d Gallus_gallus.Gallus_gallus-5.0.dna.toplevel.fa.gz
+
+/lustre/user/newton/software/samtools-1.3/samtools faidx Gallus_gallus.Gallus_gallus-5.0.dna.toplevel.fa
+/lustre/user/newton/software/bwa-0.7.12/bwa index Gallus_gallus.Gallus_gallus-5.0.dna.toplevel.fa
+/lustre/user/newton/software/jre1.8.0_60/jre1.8.0_60/bin/java -Xmx2g -jar /lustre/user/newton/software/picard-tools-1.119/CreateSequenceDictionary.jar R=./Gallus_gallus.Gallus_gallus-5.0.dna.toplevel.fa OUTPUT=Gallus_gallus.Gallus_gallus-5.0.dna.toplevel.dict
+
+##mapping pe
+
+/lustre/user/newton/software/bwa-0.7.12/bwa mem -t 12 -M -R  "@RG\tID:s4328_HJCMLCCXX_L2\tLB:s4328_HJCMLCCXX_L2\tPL:ILLUMINA\tSM:s4328_HJCMLCCXX_L2" /lustre/user/newton/Galgal5/Gallus_gallus.Gallus_gallus-5.0.dna.toplevel.fa s4328_HJCMLCCXX_L2_1.clean.fq.Btrim64.pe s4328_HJCMLCCXX_L2_2.clean.fq.Btrim64.pe | /lustre/user/newton/software/samtools-1.3/samtools view -bS - -o s4328_HJCMLCCXX_L2_pe.bam
+
+cat s4328_HJCMLCCXX_L2_1.clean.fq.Btrim64.se s4328_HJCMLCCXX_L2_2.clean.fq.Btrim64.se > s4328_HJCMLCCXX_L2.fq.se
+gzip s4328_HJCMLCCXX_L2_1.clean.fq.Btrim64.pe s4328_HJCMLCCXX_L2_2.clean.fq.Btrim64.pe s4328_HJCMLCCXX_L2_1.clean.fq.Btrim64.se s4328_HJCMLCCXX_L2_2.clean.fq.Btrim64.se
+
+##mapping se
+
+/lustre/user/newton/software/bwa-0.7.12/bwa mem -t 12 -M -R  "@RG\tID:s4328_HJCMLCCXX_L2_se\tLB:s4328_HJCMLCCXX_L2\tPL:ILLUMINA\tSM:s4328_HJCMLCCXX_L2" /lustre/user/newton/Galgal5/Gallus_gallus.Gallus_gallus-5.0.dna.toplevel.fa s4328_HJCMLCCXX_L2.fq.se | /lustre/user/newton/software/samtools-1.3/samtools view -bS - -o s4328_HJCMLCCXX_L2_se.bam
+
+##index pe & se bam files [this command seems to have a problem]
+#/lustre/user/newton/software/samtools-1.3/samtools index s4328_HJCMLCCXX_L2_pe.bam
+#/lustre/user/newton/software/samtools-1.3/samtools index s4328_HJCMLCCXX_L2_se.bam
+
+##trying to sort first?? Sorting bam file [have to put options okey!]
+#***/lustre/user/newton/software/samtools-1.3/samtools sort /lustre/user/newton/4275_clean_aln.bam -o 4275_clean_aln.sorted
+#***/lustre/user/newton/software/samtools-1.3/samtools sort /lustre/user/newton/4275_clean_aln.bam -o 4275_clean_aln.sorted 
+
+###pe #### [sort & mark duplicates & index]
+/lustre/user/newton/software/jre1.8.0_60/jre1.8.0_60/bin/java -Xmx4g -jar /lustre/user/newton/software/picard-tools-1.119/SortSam.jar INPUT=s4328_HJCMLCCXX_L2_pe.bam OUTPUT=s4328_HJCMLCCXX_L2_pe.sort.bam SORT_ORDER=coordinate
+/lustre/user/newton/software/jre1.8.0_60/jre1.8.0_60/bin/java -Xmx4g -jar /lustre/user/newton/software/picard-tools-1.119/MarkDuplicates.jar  INPUT=s4328_HJCMLCCXX_L2_pe.sort.bam OUTPUT=s4328_HJCMLCCXX_L2_pe.sort.dedup.bam METRICS_FILE=s4328_HJCMLCCXX_L2_pe.dedup.metrics VALIDATION_STRINGENCY=LENIENT MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=50
+/lustre/user/newton/software/samtools-1.3/samtools index s4328_HJCMLCCXX_L2_pe.sort.dedup.bam
+
+##REQUIRE KNOWN FILE.... 
+#original file has diff. chr. order compared to the galgal5 ref. 
+#to change the order for compartibility use:
+
+#!/bin/sh
+#PBS -N change.order.quick
+#PBS -q small
+#PBS -l nodes=1:ppn=1
+#PBS -o /lustre/user/newton/Galgal5/choder.out
+#PBS -e /lustre/user/newton/Galgal5/choder.err
+
+cd /lustre/user/newton/Galgal5
+
+grep -P "^#" Gallus_gallus.vcf > neworder001.vcf
+
+for orders in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 30 31 32 33 W Z MT LGE64; do
+grep -P "^${orders}\s" Gallus_gallus.vcf >> neworder001.vcf
+done
+
+
+***********************************
+##pe [realigh target & realign indels & recalibrate base & print reads]
+
+/lustre/user/newton/software/jre1.8.0_60/jre1.8.0_60/bin/java -Xmx16g -jar /lustre/user/newton/software/GenomeAnalysisTK34.jar -R /lustre/user/newton/Galgal5/Gallus_gallus.Gallus_gallus-5.0.dna.toplevel.fa -T RealignerTargetCreator -o s4328_HJCMLCCXX_L2_pe.sort.dedup.bam.intervals -I ./s4328_HJCMLCCXX_L2_pe.sort.dedup.bam -known /lustre/user/newton/Galgal5/neworder001.vcf
+
+/lustre/user/newton/software/jre1.8.0_60/jre1.8.0_60/bin/java -Xmx16g -jar /lustre/user/newton/software/GenomeAnalysisTK34.jar -R /lustre/user/newton/Galgal5/Gallus_gallus.Gallus_gallus-5.0.dna.toplevel.fa -T IndelRealigner -targetIntervals ./s4328_HJCMLCCXX_L2_pe.sort.dedup.bam.intervals -o ./s4328_HJCMLCCXX_L2_pe.sort.dedup.realigh.bam -I ./s4328_HJCMLCCXX_L2_pe.sort.dedup.bam -known /lustre/user/newton/Galgal5/neworder001.vcf
+
+/lustre/user/newton/software/jre1.8.0_60/jre1.8.0_60/bin/java -Xmx16g -jar /lustre/user/newton/software/GenomeAnalysisTK34.jar -R /lustre/user/newton/Galgal5/Gallus_gallus.Gallus_gallus-5.0.dna.toplevel.fa -T BaseRecalibrator -o ./s4328_HJCMLCCXX_L2_pe.sort.dedup.realigh.bam.recal.grp -I ./s4328_HJCMLCCXX_L2_pe.sort.dedup.realigh.bam -knownSites /lustre/user/newton/Galgal5/neworder001.vcf
+
+/lustre/user/newton/software/jre1.8.0_60/jre1.8.0_60/bin/java -Xmx16g -jar /lustre/user/newton/software/GenomeAnalysisTK34.jar -R /lustre/user/newton/Galgal5/Gallus_gallus.Gallus_gallus-5.0.dna.toplevel.fa -T PrintReads -I ./s4328_HJCMLCCXX_L2_pe.sort.dedup.realigh.bam -BQSR ./s4328_HJCMLCCXX_L2_pe.sort.dedup.realigh.bam.recal.grp -o ./s4328_HJCMLCCXX_L2_pe.sort.dedup.realigh.recal.bam
+
+###se ####
+#[sort & mark duplicates & index]
+
+/lustre/user/newton/software/jre1.8.0_60/jre1.8.0_60/bin/java -Xmx4g -jar /lustre/user/newton/software/picard-tools-1.119/SortSam.jar INPUT=s4328_HJCMLCCXX_L2_se.bam OUTPUT=s4328_HJCMLCCXX_L2_se.sort.bam SORT_ORDER=coordinate
+/lustre/user/newton/software/jre1.8.0_60/jre1.8.0_60/bin/java -Xmx4g -jar /lustre/user/newton/software/picard-tools-1.119/MarkDuplicates.jar  INPUT=s4328_HJCMLCCXX_L2_se.sort.bam OUTPUT=s4328_HJCMLCCXX_L2_se.sort.dedup.bam METRICS_FILE=s4328_HJCMLCCXX_L2_se.dedup.metrics VALIDATION_STRINGENCY=LENIENT MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=50
+/lustre/user/newton/software/samtools-1.3/samtools index s4328_HJCMLCCXX_L2_se.sort.dedup.bam
+
+#[realigh target & realign indels & recalibrate base & print reads]
+
+/lustre/user/newton/software/jre1.8.0_60/jre1.8.0_60/bin/java -Xmx16g -jar /lustre/user/newton/software/GenomeAnalysisTK34.jar -R /lustre/user/newton/Galgal5/Gallus_gallus.Gallus_gallus-5.0.dna.toplevel.fa -T RealignerTargetCreator -o s4328_HJCMLCCXX_L2_se.sort.dedup.bam.intervals -I ./s4328_HJCMLCCXX_L2_se.sort.dedup.bam -known /lustre/user/newton/Galgal5/neworder001.vcf
+/lustre/user/newton/software/jre1.8.0_60/jre1.8.0_60/bin/java -Xmx16g -jar /lustre/user/newton/software/GenomeAnalysisTK34.jar  -R /lustre/user/newton/Galgal5/Gallus_gallus.Gallus_gallus-5.0.dna.toplevel.fa  -T IndelRealigner -targetIntervals ./s4328_HJCMLCCXX_L2_se.sort.dedup.bam.intervals -o ./s4328_HJCMLCCXX_L2_se.sort.dedup.realigh.bam -I ./s4328_HJCMLCCXX_L2_se.sort.dedup.bam -known /lustre/user/newton/Galgal5/neworder001.vcf
+/lustre/user/newton/software/jre1.8.0_60/jre1.8.0_60/bin/java -Xmx16g -jar /lustre/user/newton/software/GenomeAnalysisTK34.jar  -R /lustre/user/newton/Galgal5/Gallus_gallus.Gallus_gallus-5.0.dna.toplevel.fa  -T BaseRecalibrator  -o ./s4328_HJCMLCCXX_L2_se.sort.dedup.realigh.bam.recal.grp -I ./s4328_HJCMLCCXX_L2_se.sort.dedup.realigh.bam -knownSites /lustre/user/newton/Galgal5/neworder001.vcf
+/lustre/user/newton/software/jre1.8.0_60/jre1.8.0_60/bin/java -Xmx16g -jar /lustre/user/newton/software/GenomeAnalysisTK34.jar -R /lustre/user/newton/Galgal5/Gallus_gallus.Gallus_gallus-5.0.dna.toplevel.fa  -T PrintReads -I ./s4328_HJCMLCCXX_L2_se.sort.dedup.realigh.bam -BQSR ./s4328_HJCMLCCXX_L2_se.sort.dedup.realigh.bam.recal.grp -o ./s4328_HJCMLCCXX_L2_se.sort.dedup.realigh.recal.bam
+
+####merge
+#[merge pe & se, index, calculate depth]
+
+/lustre/user/newton/software/jre1.8.0_60/jre1.8.0_60/bin/java -Xmx16g -jar /lustre/user/newton/software/picard-tools-1.119/MergeSamFiles.jar  INPUT=./s4328_HJCMLCCXX_L2_pe.sort.dedup.realigh.recal.bam INPUT=./s4328_HJCMLCCXX_L2_se.sort.dedup.realigh.recal.bam  OUTPUT=s4328_HJCMLCCXX_L2.sort.rmdup.realn.recal.merge.bam
+
+/lustre/user/newton/software/samtools-1.3/samtools index s4328_HJCMLCCXX_L2.sort.rmdup.realn.recal.merge.bam
+/lustre/user/newton/software/samtools-1.3/samtools depth s4328_HJCMLCCXX_L2.sort.rmdup.realn.recal.merge.bam  | awk '{sum+=$3} END { print "19912.bam Average depth = ",sum/NR}' >./s4328_HJCMLCCXX_L2.all.depth.txt
+/lustre/user/newton/software/samtools-1.3/samtools depth s4328_HJCMLCCXX_L2.sort.rmdup.realn.recal.merge.bam  -r Z | awk '{sum+=$3} END { print "19912_chrZ.bam Average depth = ",sum/NR}' >./s4328_HJCMLCCXX_L2.chrZ.depth.txt
+
+#done
+	
+
+
+
+
+

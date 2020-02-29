@@ -1,7 +1,0 @@
-cd ./yuanbaochicken
-/home/zhumy/biosoft/vcftools_0.1.13/bin/vcftools --vcf /home/zhumy/yuanbaochicken/yuanbao_white..recode.vcf --window-pi 50000 --window-pi-step 25000 --out yuanbao_white..recode.vcf.W50S25 2>copy1.pi.err &
-/home/zhumy/biosoft/vcftools_0.1.13/bin/vcftools --vcf /home/zhumy/yuanbaochicken/yuanbao_black..recode.vcf --window-pi 50000 --window-pi-step 25000 --out yuanbao_black..recode.vcf.W50S25 2>copy1.pi.err &
-/home/zhumy/biosoft/vcftools_0.1.13/bin/vcftools --vcf /home/zhumy/yuanbaochicken/yuanbao_other..recode.vcf --window-pi 50000 --window-pi-step 25000 --out yuanbao_other..recode.vcf.W50S25 2>copy1.pi.err &
-
-
-

@@ -1,0 +1,8 @@
+###########pca
+/home/zhumy/biosoft/vcftools/vcftools_0.1.13/bin/vcftools  --vcf Frizzle_chicken_filterno3.vcf  --maf 0.05 --plink --out Frizzle_chicken_filterno3.autos
+
+/home/zhumy/biosoft/PLINK/plink --noweb --dog  --file Frizzle_chicken_filterno3.vcf.autos --indep-pairwise 50 10 0.1
+/home/zhumy/biosoft/PLINK/plink --noweb --dog  --file Frizzle_chicken_filterno3.autos --extract plink.prune.in --make-bed --out Frizzle_chicken_filterno3.autos_prunedData_pairwise
+/home/zhumy/biosoft/gcta/gcta64 --bfile Frizzle_chicken_filterno3.autos_prunedData_pairwise --make-grm --autosome --out Frizzle_chicken_filterno3.autos_prunedData_pairwise_grm
+/home/zhumy/biosoft/gcta/gcta64 --grm Frizzle_chicken_filterno3.autos_prunedData_pairwise_grm  --pca 3 --out Frizzle_chicken_filterno3.autos_prunedData_pairwise.pca
+##处理pca的方法，转换两部文件，主成分分析
