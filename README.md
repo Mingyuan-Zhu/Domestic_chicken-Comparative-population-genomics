@@ -20,9 +20,9 @@ Yuanbao Chicken is a famous ornamental chicken. It has the appearance of Jin Yua
 
 
 
-![Photo](https://github.com/Mingyuan-Zhu/Domestic_chicken-Comparative-population-genomics/tree/master/photos/FIG1(abc).jpg)
+![Photo1](https://github.com/Mingyuan-Zhu/Domestic_chicken-Comparative-population-genomics/blob/master/photos/%E6%9C%AA%E6%A0%87%E9%A2%98-1.jpg)
 
-
+![photh2]()
 
 
 
